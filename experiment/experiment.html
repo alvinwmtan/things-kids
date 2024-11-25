@@ -1,18 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triad Experiment</title>
+
+    <!-- Basic jsPsych functionality -->
+    <script src="jspsych/jspsych.js"></script>
+    <script src="jspsych/dist/jspsych.js"></script>
+    <link href="jspsych/dist/jspsych.css" rel="stylesheet" type="text/css" />
+
+   <!-- Loading jsPsych Plugins -->
+   <script src="jspsych/dist/plugin-instructions.js"></script>
+   <script src="jspsych/dist/plugin-html-button-response.js"></script>
+   <script src="jspsych/dist/plugin-html-keyboard-response.js"></script>
+   <script src="jspsych/dist/plugin-audio-keyboard-response.js"></script>
+   <script src="jspsych/dist/plugin-image-button-response.js"></script>
     
     <!-- link the CSS file you made-->
     <link href="experiment.css" rel="stylesheet" type="text/css" />
-    <link href="https://unpkg.com/jspsych@7.3.4/css/jspsych.css" rel="stylesheet" type="text/css" />
 
-    <!-- This is the name that will appear on the browser tab. -->
-    <title>Triad Experiment</title>
+    <!-- Include Custom JS -->
+    <script src="experiment.js"></script>
+
+    
 </head>
 <body>
     <div id="jspsych-experiment"></div>
-
-    <!-- Include the main experiment script -->
-    <script src="experiment.js"></script>
 </body>
 </html>
