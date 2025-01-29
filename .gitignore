@@ -1,0 +1,4 @@
+# Ignore the images folder within the experiment directory
+experiment/images/
+
+_image-database_CC0.zip
