@@ -10,7 +10,7 @@ var consent_trial = {
   type: jsPsychHtmlButtonResponse,
   stimulus: `
     <p>Please enter your age:</p>
-    <input type="number" id="age" name="age" min="0" max="100" required>
+    <input type="number" id="age" name="age" min="0" max="200" required>
     <p>Please select your sex:</p>
     <select id="sex" name="sex" required>
       <option value="" disabled selected>Select your option</option>
@@ -51,7 +51,7 @@ var instructions = {
 // Page before practice trials
 var practice_instructions = {
   type: jsPsychHtmlButtonResponse,
-  stimulus: `<p>Now you will begin practice trials. These trials are easy. You must get at least 3 correct responses before you can move on to the actual experiment.</p>`,
+  stimulus: `<p>Let's start with some practice trials! These are designed to help you get used to the task, so once you get 3 correct you can move on to the experiment.</p>`,
   choices: ['Begin Practice']
 };
 
@@ -115,7 +115,7 @@ var practice_loop = {
 // Page after practice trials
 var post_practice_instructions = {
   type: jsPsychHtmlButtonResponse,
-  stimulus: `<p>Great job, you met the practice criterion! Now you'll begin the actual experiment trials.</p>`,
+  stimulus: `<p>Great job, you passed the practice trials! Now let's begin the actual experiment.</p>`,
   choices: ['Continue']
 };
 
