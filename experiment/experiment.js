@@ -137,20 +137,81 @@ var all_practice_trials = [
   {stimulus: ['images/common_items/turtle.jpg', 'images/common_items/apple.jpg', 'images/common_items/banana.jpg'], correct: 0},
 ];
 
-// Randomly select 6 practice trials
-var selected_practice_trials = jsPsych.randomization.sampleWithoutReplacement(all_practice_trials, 6);
+var easy_practice_trials = [
+  {stimulus: ['images/common_items/cat1.jpg', 'images/common_items/dog.jpg', 'images/common_items/pie.jpg'], correct: 2},
+  {stimulus: ['images/common_items/chicken1.jpg', 'images/common_items/chocolate.jpg', 'images/common_items/chicken2.jpg'], correct: 1},
+  {stimulus: ['images/common_items/eye.jpg', 'images/common_items/cookie1.jpg', 'images/common_items/cookie2.jpg'], correct: 0},
+  {stimulus: ['images/common_items/apple1.jpg', 'images/common_items/apple2.jpg', 'images/common_items/bathtub.jpg'], correct: 2},
+]
+
+var medium_practice_trials = [
+  {stimulus: ['images/common_items/cat1.jpg', 'images/common_items/dog.jpg', 'images/common_items/pie.jpg'], correct: 2},
+  {stimulus: ['images/common_items/apple1.jpg', 'images/common_items/leg.jpg', 'images/common_items/orange.jpg'], correct: 1},
+  {stimulus: ['images/common_items/ear.jpg', 'images/common_items/cow.jpg', 'images/common_items/deer.jpg'], correct: 0},
+  {stimulus: ['images/common_items/horse.jpg', 'images/common_items/donkey.jpg', 'images/common_items/eye.jpg'], correct: 2},
+  {stimulus: ['images/common_items/yogurt.jpg', 'images/common_items/tiger.jpg', 'images/common_items/soup.jpg'], correct: 1},
+  {stimulus: ['images/common_items/ski.jpg', 'images/common_items/strawberry.jpg', 'images/common_items/watermelon.jpg'], correct: 0},
+]
+
+// Sample 2 easy and 4 medium practice trials.
+var selected_easy = jsPsych.randomization.sampleWithoutReplacement(easy_practice_trials, 2);
+var selected_medium = jsPsych.randomization.sampleWithoutReplacement(medium_practice_trials, 4);
+var selected_practice_trials = selected_easy.concat(selected_medium);
+selected_practice_trials = jsPsych.randomization.shuffle(selected_practice_trials);
 
 // Global counter for correct practice responses
 var practice_correct_count = 0;
 
-// Transform each selected practice trial into a conditional timeline node
+// Transform practice trial definitions into clickable image trials (triangle layout)
+var practice_trials = selected_practice_trials.map(function(trial, trialIndex) {
+  // Build HTML: instruction text then images arranged as a triangle.
+  var html_str = '<p style="text-align: center; font-weight: bold; font-size: 1.2em;">Click the odd one out</p>';
+  html_str += '<div style="text-align:center;">';
+  // Top row: first image
+  html_str += `<div><img src="${trial.stimulus[0]}" id="practice_img_${trialIndex}_0" style="cursor:pointer; width:200px; margin:10px;"></div>`;
+  // Bottom row: second and third images
+  html_str += '<div>';
+  html_str += `<img src="${trial.stimulus[1]}" id="practice_img_${trialIndex}_1" style="cursor:pointer; width:200px; margin:10px;">`;
+  html_str += `<img src="${trial.stimulus[2]}" id="practice_img_${trialIndex}_2" style="cursor:pointer; width:200px; margin:10px;">`;
+  html_str += '</div></div>';
+
+  return {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: html_str,
+    choices: "NO_KEYS", // disable default keyboard responses
+    data: { phase: 'practice' },
+    on_load: function() {
+      // Attach click listeners to images
+      trial.stimulus.forEach(function(_, idx) {
+        document.getElementById(`practice_img_${trialIndex}_${idx}`).addEventListener('click', function() {
+          var correct = (idx === trial.correct);
+          // Update global counter if correct
+          if (correct) {
+            practice_correct_count++;
+          }
+          // Finish trial and record data.
+          jsPsych.finishTrial({
+            clicked: idx,
+            correct: correct
+          });
+        });
+      });
+    }
+  };
+});
+
+// Transform each selected practice trial into a conditional timeline node (triangle layout)
 var conditional_practice_nodes = selected_practice_trials.map(function(trial, trialIndex) {
-  // Build HTML with three clickable images (each gets a unique id using trialIndex and image index)
-  var html_str = '<div style="display: flex; justify-content: space-around;">';
-  trial.stimulus.forEach(function(img_src, idx) {
-    html_str += `<img src="${img_src}" id="practice_img_${trialIndex}_${idx}" style="cursor: pointer; width: 200px; margin:10px;">`;
-  });
-  html_str += '</div>';
+  // Build HTML: add instruction text then arrange images in a triangle.
+  var html_str = '<p style="text-align: center; font-weight: bold; font-size: 1.2em;">Click the odd one out</p>';
+  html_str += '<div style="text-align:center;">';
+  // Top row: first image.
+  html_str += `<div><img src="${trial.stimulus[0]}" id="practice_img_${trialIndex}_0" style="cursor: pointer; width:200px; margin:10px;"></div>`;
+  // Bottom row: second and third images.
+  html_str += '<div>';
+  html_str += `<img src="${trial.stimulus[1]}" id="practice_img_${trialIndex}_1" style="cursor: pointer; width:200px; margin:10px;">`;
+  html_str += `<img src="${trial.stimulus[2]}" id="practice_img_${trialIndex}_2" style="cursor: pointer; width:200px; margin:10px;">`;
+  html_str += '</div></div>';
 
   // Create the single practice trial node
   var practiceNode = {
@@ -160,15 +221,14 @@ var conditional_practice_nodes = selected_practice_trials.map(function(trial, tr
       choices: "NO_KEYS", // disable default keyboard responses
       data: { phase: 'practice' },
       on_load: function() {
-        // Attach click listeners to each image
-        trial.stimulus.forEach(function(_, idx) {
+        // Attach click listeners to each image in the triangle layout.
+        // Iterate over 0,1,2 for the three images
+        [0,1,2].forEach(function(idx) {
           document.getElementById(`practice_img_${trialIndex}_${idx}`).addEventListener('click', function() {
             var correct = (idx === trial.correct);
-            // Update global counter if correct
             if (correct) {
               practice_correct_count++;
             }
-            // Finish the trial and record data
             jsPsych.finishTrial({
               clicked: idx,
               correct: correct
@@ -177,7 +237,7 @@ var conditional_practice_nodes = selected_practice_trials.map(function(trial, tr
         });
       }
     }],
-    // Run this node only if fewer than 3 correct trials have been recorded.
+    // Run this node only if fewer than 3 correct practice responses have been recorded.
     conditional_function: function() {
       return practice_correct_count < 3;
     }
@@ -204,83 +264,84 @@ var post_practice_instructions = {
   choices: ['Continue']
 };
 
-// Define actual experiment trials:
-// Assume we have a folder of images (e.g., images/) and you want to present blocks of 10 trials.
-// We use jsPsych.randomization.sampleWithoutReplacement to select 10 images for each block.
-var imageFiles = ["images/common_items/acorn.jpg", "images/common_items/airplane.jpg","images/common_items/alligator.jpg","images/common_items/aloe.jpg","images/common_items/ankle.jpg","images/common_items/ant.jpg","images/common_items/antenna.jpg","images/common_items/apple.jpg","images/common_items/applesauce.jpg","images/common_items/arm.jpg","images/common_items/artichoke.jpg","images/common_items/baby.jpg","images/common_items/ball.jpg","images/common_items/balloon.jpg","images/common_items/bamboo.jpg","images/common_items/banana.jpg","images/common_items/barrel.jpg","images/common_items/basket.jpg","images/common_items/bat1.jpg","images/common_items/bathtub.jpg","images/common_items/bear.jpg","images/common_items/bed.jpg","images/common_items/bee.jpg","images/common_items/belt.jpg","images/common_items/bench.jpg","images/common_items/bib.jpg","images/common_items/bird.jpg","images/common_items/blanket.jpg","images/common_items/blender.jpg","images/common_items/block.jpg","images/common_items/blower.jpg","images/common_items/boat.jpg","images/common_items/bobsled.jpg","images/common_items/book.jpg","images/common_items/bottle.jpg","images/common_items/bouquet.jpg","images/common_items/bowl.jpg","images/common_items/box.jpg","images/common_items/boy.jpg","images/common_items/bread.jpg","images/common_items/breakfast.jpg","images/common_items/broom.jpg","images/common_items/brush.jpg","images/common_items/bucket.jpg","images/common_items/buffet.jpg","images/common_items/bug.jpg","images/common_items/bulldozer.jpg","images/common_items/bus.jpg","images/common_items/butter.jpg","images/common_items/butterfly.jpg","images/common_items/button1.jpg","images/common_items/cake.jpg","images/common_items/camera1.jpg","images/common_items/can.jpg","images/common_items/candlestick.jpg","images/common_items/candy.jpg","images/common_items/car.jpg","images/common_items/caramel.jpg","images/common_items/carousel.jpg","images/common_items/carrot.jpg","images/common_items/cassette.jpg","images/common_items/cat.jpg","images/common_items/cereal.jpg","images/common_items/chair.jpg","images/common_items/chalk.jpg","images/common_items/cheese.jpg","images/common_items/chicken2.jpg","images/common_items/chin.jpg","images/common_items/chocolate.jpg","images/common_items/cloak.jpg","images/common_items/clock.jpg","images/common_items/closet.jpg","images/common_items/clothespin.jpg","images/common_items/cloud.jpg","images/common_items/coaster.jpg","images/common_items/coat.jpg","images/common_items/coffee.jpg","images/common_items/comb.jpg","images/common_items/cookie.jpg","images/common_items/cork.jpg","images/common_items/corn.jpg","images/common_items/cornbread.jpg","images/common_items/corset.jpg","images/common_items/couch.jpg","images/common_items/cow.jpg","images/common_items/cracker.jpg","images/common_items/crayon.jpg","images/common_items/crib.jpg","images/common_items/cup.jpg","images/common_items/cymbal.jpg","images/common_items/deer.jpg","images/common_items/diaper.jpg","images/common_items/dish.jpg","images/common_items/dog.jpg","images/common_items/doll.jpg","images/common_items/donkey.jpg","images/common_items/donut.jpg","images/common_items/door.jpg","images/common_items/drawer.jpg","images/common_items/dress.jpg","images/common_items/drink.jpg","images/common_items/dryer.jpg","images/common_items/duck.jpg","images/common_items/dumpling.jpg","images/common_items/ear.jpg","images/common_items/egg.jpg","images/common_items/elbow.jpg","images/common_items/elephant.jpg","images/common_items/eye.jpg","images/common_items/face.jpg","images/common_items/fan.jpg","images/common_items/finger.jpg","images/common_items/firetruck.jpg","images/common_items/fish.jpg","images/common_items/flag.jpg","images/common_items/flan.jpg","images/common_items/flower.jpg","images/common_items/foam.jpg","images/common_items/foot.jpg","images/common_items/footbath.jpg","images/common_items/fork.jpg","images/common_items/fox.jpg","images/common_items/freezer.jpg","images/common_items/french_fries.jpg","images/common_items/frog.jpg","images/common_items/fruitcake.jpg","images/common_items/game.jpg","images/common_items/garbage.jpg","images/common_items/giraffe.jpg","images/common_items/girl.jpg","images/common_items/glass.jpg","images/common_items/glasses.jpg","images/common_items/glue.jpg","images/common_items/gondola.jpg","images/common_items/goose.jpg","images/common_items/grass.jpg","images/common_items/grate.jpg","images/common_items/green_beans.jpg","images/common_items/gum.jpg","images/common_items/gutter.jpg","images/common_items/hair.jpg","images/common_items/hamburger.jpg","images/common_items/hammer.jpg","images/common_items/hamster.jpg","images/common_items/hand.jpg","images/common_items/hat.jpg","images/common_items/headdress.jpg","images/common_items/hedgehog.jpg","images/common_items/helicopter.jpg","images/common_items/hoe.jpg","images/common_items/hopscotch.jpg","images/common_items/horn.jpg","images/common_items/horse.jpg","images/common_items/ice_cream.jpg","images/common_items/ice.jpg","images/common_items/jacket.jpg","images/common_items/jar.jpg","images/common_items/jeans.jpg","images/common_items/juice.jpg","images/common_items/kimono.jpg","images/common_items/kitten.jpg","images/common_items/knee.jpg","images/common_items/knife.jpg","images/common_items/koala.jpg","images/common_items/ladder.jpg","images/common_items/lamb.jpg","images/common_items/lamp.jpg","images/common_items/latch.jpg","images/common_items/leg.jpg","images/common_items/lion.jpg","images/common_items/locker.jpg","images/common_items/lollipop.jpg","images/common_items/man.jpg","images/common_items/mandolin.jpg","images/common_items/map.jpg","images/common_items/marshmallow.jpg","images/common_items/meat.jpg","images/common_items/melon.jpg","images/common_items/milk.jpg","images/common_items/milkshake.jpg","images/common_items/money.jpg","images/common_items/monkey.jpg","images/common_items/moose.jpg","images/common_items/mop.jpg","images/common_items/motorcycle.jpg","images/common_items/mouse1.jpg","images/common_items/mouth.jpg","images/common_items/muffin.jpg","images/common_items/mulch.jpg","images/common_items/nail.jpg","images/common_items/napkin.jpg","images/common_items/necklace.jpg","images/common_items/net.jpg","images/common_items/nose.jpg","images/common_items/oatmeal.jpg","images/common_items/oil.jpg","images/common_items/omelet.jpg","images/common_items/orange.jpg","images/common_items/otter.jpg","images/common_items/oven.jpg","images/common_items/owl.jpg","images/common_items/paint.jpg","images/common_items/pajamas.jpg","images/common_items/pancake.jpg","images/common_items/pants.jpg","images/common_items/paper.jpg","images/common_items/parsley.jpg","images/common_items/peanut_butter.jpg","images/common_items/pen.jpg","images/common_items/pencil.jpg","images/common_items/penguin.jpg","images/common_items/pickle.jpg","images/common_items/pie.jpg","images/common_items/pig.jpg","images/common_items/pillow.jpg","images/common_items/pistachio.jpg","images/common_items/pitcher.jpg","images/common_items/pizza.jpg","images/common_items/plant.jpg","images/common_items/plate.jpg","images/common_items/pony.jpg","images/common_items/popcorn.jpg","images/common_items/popsicle.jpg","images/common_items/potato.jpg","images/common_items/pretzel.jpg","images/common_items/prism.jpg","images/common_items/prune.jpg","images/common_items/pudding.jpg","images/common_items/puddle.jpg","images/common_items/pump.jpg","images/common_items/pumpkin.jpg","images/common_items/puppy.jpg","images/common_items/purse.jpg","images/common_items/zebra.jpg","images/common_items/zipper.jpg"];
-
-// Function to generate a block of 10 trials from imageFiles.
-// Each trial now displays 3 distinct random images.
-// Additional data (block, trial, rt, stimuli, choice) is recorded for every trial.
-function generateGameBlock(blockIndex) {
-  var game_trials = [];
-  for (let trialIndex = 0; trialIndex < 10; trialIndex++) {
-    // Select 3 random images without replacement for the trial.
-    var trial_images = jsPsych.randomization.sampleWithoutReplacement(imageFiles, 3);
-    
-    // Build HTML to display the 3 images.
-    var html_str = '<div style="display: flex; justify-content: space-around;">';
-    trial_images.forEach(function(src, jdx) {
-      html_str += `<img src="${src}" id="game_img_${blockIndex}_${trialIndex}_${jdx}" style="cursor: pointer; width: 200px; margin:10px;">`;
-    });
-    html_str += '</div>';
-    
-    // Create the trial
-    game_trials.push({
-      type: jsPsychHtmlKeyboardResponse,
-      stimulus: html_str,
-      choices: "NO_KEYS", // Disable default keyboard responses
-      // Pre-set data for the trial; note that stimuli (the order) is included.
-      data: { phase: 'game', block: blockIndex, trial: trialIndex, stimuli: trial_images },
-      on_load: function() {
-        // Record the start time of the trial.
-        var startTime = performance.now();
-        // Attach click listeners to each image
-        trial_images.forEach(function(src, jdx) {
-          document.getElementById(`game_img_${blockIndex}_${trialIndex}_${jdx}`).addEventListener('click', function() {
-            // Reaction time calculation
-            var rt = performance.now() - startTime;
-            // Record the choice and additional data, then finish the trial.
-            jsPsych.finishTrial({
-              block: blockIndex,
-              trial: trialIndex,
-              stimuli: trial_images,
-              choice: jdx,
-              rt: rt
-            });
-          });
-        });
-      }
-    });
-  }
-  return game_trials;
-}
-
-// Page after each game block asking if they want to continue
 var continue_page = {
-  type: jsPsychHtmlButtonResponse,
-  stimulus: `<p>You have completed a block of 10 trials. Do you want to continue?</p>`,
-  choices: ['Continue']
+    type: jsPsychHtmlButtonResponse,
+    stimulus: `<p>You have completed a block of trials. Do you want to continue?</p>`,
+    choices: ['Continue']
 };
 
-// Build overall timeline
-var timeline = [];
-timeline.push(consent_trial);
-timeline.push(instructions);
-timeline.push(practice_instructions);
-timeline.push(practice_loop);
-timeline.push(post_practice_instructions);
+// Fetch the image file list from your JSON file.
+fetch('image_files.json')
+  .then(response => response.json())
+  .then(data => {
+    // data now holds your array of image file paths.
+    var imageFiles = data;
+    
+    // (Keep your existing practice/trials code unchanged.)
+    // For example, your generateGameBlock function will now use the
+    // imageFiles variable loaded from JSON.
+    function generateGameBlock(blockIndex) {
+      var game_trials = [];
+      for (let trialIndex = 0; trialIndex < 10; trialIndex++) {
+        // Select 3 random images without replacement from the JSON list.
+        var trial_images = jsPsych.randomization.sampleWithoutReplacement(imageFiles, 3);
+        
+        // Build HTML to display the 3 images in a triangle.
+        var html_str = '<p style="text-align: center; font-weight: bold; font-size: 1.2em;">Click the odd one out</p>';
+        html_str += '<div style="text-align:center;">';
+        // Top row: first image.
+        html_str += `<div><img src="${trial_images[0]}" id="game_img_${blockIndex}_${trialIndex}_0" style="cursor: pointer; width: 200px; margin:10px;"></div>`;
+        // Bottom row: second and third images.
+        html_str += '<div>';
+        html_str += `<img src="${trial_images[1]}" id="game_img_${blockIndex}_${trialIndex}_1" style="cursor: pointer; width: 200px; margin:10px;">`;
+        html_str += `<img src="${trial_images[2]}" id="game_img_${blockIndex}_${trialIndex}_2" style="cursor: pointer; width: 200px; margin:10px;">`;
+        html_str += '</div></div>';
+        
+        game_trials.push({
+          type: jsPsychHtmlKeyboardResponse,
+          stimulus: html_str,
+          choices: "NO_KEYS",
+          data: { phase: 'game', block: blockIndex, trial: trialIndex, stimuli: trial_images },
+          on_load: function() {
+            var startTime = performance.now();
+            trial_images.forEach(function(src, jdx) {
+              document.getElementById(`game_img_${blockIndex}_${trialIndex}_${jdx}`).addEventListener('click', function() {
+                var rt = performance.now() - startTime;
+                jsPsych.finishTrial({
+                  block: blockIndex,
+                  trial: trialIndex,
+                  stimuli: trial_images,
+                  choice: jdx,
+                  rt: rt
+                });
+              });
+            });
+          }
+        });
+      }
+      return game_trials;
+    }
+    
+    // Build your overall timeline as before.
+    var timeline = [];
+    timeline.push(consent_trial);
+    timeline.push(instructions);
+    timeline.push(practice_instructions);
+    timeline.push(practice_loop);
+    timeline.push(post_practice_instructions);
+    
+    // For demonstration, schedule two blocks of game trials.
+    for (let blockIndex = 0; blockIndex < 2; blockIndex++) {
+      // Push a block of 10 game trials
+      timeline.push({
+        timeline: generateGameBlock(blockIndex)
+      });
+      // After each block, ask if they want to continue.
+      timeline.push(continue_page);
+    }
+    
+    // Start the experiment.
+    jsPsych.run(timeline);
 
-// For demonstration, we'll schedule two blocks of game trials.
-// For additional blocks, you can repeat these steps.
-for (let blockIndex = 0; blockIndex < 2; blockIndex++) {
-  // Push a block of 10 game trials
-  timeline.push({
-    timeline: generateGameBlock(blockIndex)
-  });
-  // After each block, ask if they want to continue, except after the final block if desired.
-  timeline.push(continue_page);
-}
-
-// Start the experiment
-jsPsych.run(timeline);
+  })
+  .catch(error => console.error('Error loading image files:', error));

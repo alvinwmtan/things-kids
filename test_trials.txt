@@ -8,3 +8,17 @@
 8. Cat, Dog, Teapot
 9. Cat, Elephant, Pancake
 10. Apple, Banana, Turtle
+
+Easy Trials
+1. cat1, cat2, fork
+2. chicken1, chicken2, chocolate
+3. cookie1, cookie2, eye
+4. apple1, apple2, bathtub
+
+Medium Trials
+1. cat1, dog, pie
+2. apple1, orange, leg
+3. cow, deer, ear
+4. horse, donkey, eye
+5. yogurt, soup, tiger
+6. watermelon, strawberry, ski
