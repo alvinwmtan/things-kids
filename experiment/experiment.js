@@ -1,4 +1,4 @@
-const onserver = false;
+const onserver = true;
 let ppt_id = 'P' + Date.now();
 
 // Initialize jsPsych
@@ -130,7 +130,8 @@ const consent_trial = {
         const data = {
           age: selectedAge,
           sex: selectedSex,
-          save_guesses: saveGuesses
+          save_guesses: saveGuesses,
+          ppt_id: ppt_id
         };
         cacheAndLogData(data);
         jsPsych.finishTrial(data);

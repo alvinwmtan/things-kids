@@ -10,9 +10,9 @@ const port = process.env.PORT || 3101;
 
 // Middleware
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'experiment')));
+app.use(express.static(path.join(__dirname)));
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'experiment', 'experiment.html'));
+    res.sendFile(path.join(__dirname, 'experiment.html'));
 });
 
 // MongoDB

@@ -7,7 +7,7 @@ $(document.body).bind("click", function(e) {
 const refreshTime = 120000;
 function refresh() {
     if (new Date().getTime() - time >= refreshTime) {
-        window.location.href = "https://stanford-cogsci.org:8881/landing_page.html"
+        window.location.href = "https://stanford-cogsci.org:8880/landing_page.html"
         console.log("No user activities. Reload.")
     } else {
         setTimeout(refresh, refreshTime / 2);
