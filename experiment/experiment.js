@@ -47,11 +47,7 @@ const consent_trial = {
       <button class="age-option" data-age="7">7</button>
       <button class="age-option" data-age="8">8</button>
       <button class="age-option" data-age="9">9</button>
-      <button class="age-option" data-age="10">10</button>
-      <button class="age-option" data-age="11">11</button>
-      <button class="age-option" data-age="12">12</button>
-      <button class="age-option" data-age="13">13</button>
-      <button class="age-option" data-age="14+">14+</button>
+      <button class="age-option" data-age="10+">10+</button>
       <button class="age-option" data-age="Adult">Adult</button>
     </div>
     <br>
