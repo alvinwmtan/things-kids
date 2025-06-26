@@ -1,7 +1,13 @@
-# Ignore the images folder within the experiment directory
+# images
 experiment/images/
-
 _image-database_CC0.zip
+
+# misc
 .DS_Store
 copy_images.py
 mongo_auth.json
+
+# node
+node_modules/
+package-lock.json
+package.json
