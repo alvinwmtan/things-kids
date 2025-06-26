@@ -4,3 +4,4 @@ experiment/images/
 _image-database_CC0.zip
 .DS_Store
 copy_images.py
+mongo_auth.json
