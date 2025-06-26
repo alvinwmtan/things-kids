@@ -1,24 +1,36 @@
+const onserver = false;
+let ppt_id = 'P' + Date.now();
+
 // Initialize jsPsych
 const jsPsych = initJsPsych({
   override_safe_mode: true,
   on_finish: function() {
+    if (!onserver) {
+      jsPsych.data.get().localSave('csv', "tk_" + ppt_id + ".csv");
+    }
     jsPsych.data.displayData();
+  },
+  on_close: function() {
+    if (!onserver) {
+      jsPsych.data.get().localSave('csv', "tk_" + ppt_id + ".csv");
+    }
   }
 });
 
+jsPsych.data.addProperties({ ppt_id: ppt_id });
+
 // Data caching function
 function cacheAndLogData(data) {
-  // Cache the data locally (in a real implementation, this would be sent to server)
   if (!window.experimentData) {
     window.experimentData = [];
   }
   window.experimentData.push(data);
   
-  // Log to console for debugging
-  console.log('Trial data:', data);
-  
-  // In a real implementation, you would send data to server here
-  // Example: fetch('/api/trial-data', { method: 'POST', body: JSON.stringify(data) });
+  if (onserver) {
+    logData(data);
+  } else {
+    console.log('Trial data:', data);
+  }
 }
 
 // Define consent and age check
@@ -35,7 +47,11 @@ const consent_trial = {
       <button class="age-option" data-age="7">7</button>
       <button class="age-option" data-age="8">8</button>
       <button class="age-option" data-age="9">9</button>
-      <button class="age-option" data-age="10+">10+</button>
+      <button class="age-option" data-age="10">10</button>
+      <button class="age-option" data-age="11">11</button>
+      <button class="age-option" data-age="12">12</button>
+      <button class="age-option" data-age="13">13</button>
+      <button class="age-option" data-age="14+">14+</button>
       <button class="age-option" data-age="Adult">Adult</button>
     </div>
     <br>
@@ -141,7 +157,7 @@ const practice_instructions = {
   choices: ['Begin Practice']
 };
 
-// Define 10 practice trial definitions
+// Define practice trials
 const easy_practice_trials = [
   {stimulus: ['images/cat_01b.jpg', 'images/cat_05s.jpg', 'images/pie.jpg'], correct: 2},
   {stimulus: ['images/chicken2_02s.jpg', 'images/chocolate.jpg', 'images/chicken2_03s.jpg'], correct: 1},
