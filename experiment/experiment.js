@@ -60,7 +60,7 @@ const consent_trial = {
     </div>
     <br>
     <h2>Can we save your guesses?</h2>
-    <div id="save-box">
+    <div id="save-box" style="font-size: 20px;">
       <input type="checkbox" id="save-guesses-check">
       <label for="save-guesses-check">Yes, save my guesses</label>
     </div>
@@ -142,16 +142,14 @@ const consent_trial = {
 
 // Define instructions
 const instructions = {
-  type: jsPsychHtmlButtonResponse,
-  stimulus: '<p>In this experiment, you will see three images in each trial. Select the image that doesn\'t belong with the others (the "odd one out").</p>',
-  choices: ['Continue']
-};
-
-// Page before practice trials
-const practice_instructions = {
-  type: jsPsychHtmlButtonResponse,
-  stimulus: `<p>Let's start with some practice trials! These are designed to help you get used to the task, so once you get 3 correct you can move on to the experiment.</p>`,
-  choices: ['Begin Practice']
+  type: jsPsychAudioButtonResponse,
+  stimulus: 'audio/instructions.mp3',
+  prompt: '<p style="font-size: 20px;">Let\'s play a game!<br>' +
+          'In this game, I will show you three pictures.<br>' +
+          'Choose the picture that\'s not like the others.<br>' +
+          'Let\'s look at a few together!</p>',
+  trial_ends_after_audio: true,
+  // choices: ['Continue']
 };
 
 // Define practice trials
@@ -190,9 +188,9 @@ const conditional_practice_nodes = selected_practice_trials.map(function(trial, 
       stimulus: `<p style="text-align: center; font-weight: bold; font-size: 1.2em;">Which one is not like the others?</p>`,
       choices: trial.stimulus,
       button_html: [
-        `<img src="${trial.stimulus[0]}" style="cursor:pointer; width:200px; margin:10px;">`,
-        `<img src="${trial.stimulus[1]}" style="cursor:pointer; width:200px; margin:10px;">`,
-        `<img src="${trial.stimulus[2]}" style="cursor:pointer; width:200px; margin:10px;">`
+        `<img src="${trial.stimulus[0]}" style="cursor:pointer; width:300px; margin:10px;">`,
+        `<img src="${trial.stimulus[1]}" style="cursor:pointer; width:300px; margin:10px;">`,
+        `<img src="${trial.stimulus[2]}" style="cursor:pointer; width:300px; margin:10px;">`
       ],
       css_classes: ['triangle-layout'],
       data: { 
@@ -234,9 +232,13 @@ const practice_loop = {
 
 // Page after practice trials
 const post_practice_instructions = {
-  type: jsPsychHtmlButtonResponse,
-  stimulus: `<p>Great job, you passed the practice trials! Now let's begin the actual experiment.</p>`,
-  choices: ['Continue']
+  type: jsPsychAudioButtonResponse,
+  stimulus: 'audio/post_practice.mp3',
+  prompt: '<p style="font-size: 20px;">Great job! Let\'s look at some more pictures.</p>',
+  choices: ['yes'],
+  button_html: [
+    `<img src="images/yes.svg" style="cursor:pointer; width:150px; margin:20px;">`
+  ]
 };
 
 let current_block_index = 1;
@@ -255,9 +257,9 @@ const game_trial_template = {
     const trial_images = jsPsych.randomization.sampleWithoutReplacement(imageFiles, 3);
     trial.choices = trial_images;
     trial.button_html = [
-      `<img src="${trial_images[0]}" style="cursor:pointer; width:200px; margin:10px;">`,
-      `<img src="${trial_images[1]}" style="cursor:pointer; width:200px; margin:10px;">`,
-      `<img src="${trial_images[2]}" style="cursor:pointer; width:200px; margin:10px;">`
+      `<img src="${trial_images[0]}" style="cursor:pointer; width:300px; margin:10px;">`,
+      `<img src="${trial_images[1]}" style="cursor:pointer; width:300px; margin:10px;">`,
+      `<img src="${trial_images[2]}" style="cursor:pointer; width:300px; margin:10px;">`
     ];
     trial.data.stimuli = trial_images;
     trial.data.block = current_block_index;
@@ -274,9 +276,14 @@ for (let i = 0; i < NUM_TRIALS_PER_BLOCK; i++) {
 }
 
 const continue_page = {
-  type: jsPsychHtmlButtonResponse,
-  stimulus: `<p>Great job! Do you want to look at some more pictures?</p>`,
-  choices: ['Continue', 'No, I\'m done'],
+  type: jsPsychAudioButtonResponse,
+  stimulus: 'audio/continue.mp3',
+  prompt: '<p style="font-size: 20px;">Great job! Keep going?</p>',
+  choices: ['yes', 'no'],
+  button_html: [
+    `<img src="images/yes.svg" style="cursor:pointer; width:150px; margin:20px;">`,
+    `<img src="images/no.svg" style="cursor:pointer; width:150px; margin:20px;">`
+  ],
   data: {
     phase: 'continue_decision'
   },
@@ -285,13 +292,24 @@ const continue_page = {
   }
 };
 
+const preload = {
+  type: jsPsychPreload,
+  images: [...imageFiles, 'images/cat_01b.jpg', 'images/cat_05s.jpg', 
+    'images/chicken2_02s.jpg', 'images/chicken2_03s.jpg', 'images/dog_02s.jpg',
+    'images/cookie_08s.jpg', 'images/cookie_09s.jpg',
+    'images/apple_06s.jpg', 'images/apple_10s.jpg',
+    'images/yes.svg', 'images/no.svg']
+  // audio: audioFiles
+};
+
 // Build your overall timeline as before.
 let timeline = [];
+timeline.push(preload);
+
 let testing = false;
 if (!testing) {
   timeline.push(consent_trial);
   timeline.push(instructions);
-  timeline.push(practice_instructions);
   timeline.push(practice_loop);
   timeline.push(post_practice_instructions);
 }
@@ -306,7 +324,7 @@ const game_loop = {
     const trials = data.values ? data.values() : data.trials;
     const last_trial = trials[trials.length - 1];
     // End if "No, I'm done" (button index 1) is pressed
-    return !(last_trial.phase === 'continue_decision' && last_trial.response === 1);
+    return !(last_trial.phase === 'continue_decision' && last_trial.response === 'no');
   }
 };
 

@@ -17,5 +17,5 @@ const db_schema = new mongoose.Schema({
 
 // const db = mongoose.model('db', db_schema);
 const emptySchema = new mongoose.Schema({}, { strict: false });
-const Entry = mongoose.model('Entry', emptySchema);
+const Entry = mongoose.model('Entry', emptySchema, 'things-kids');
 module.exports = Entry;

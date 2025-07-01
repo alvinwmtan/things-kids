@@ -14,7 +14,7 @@ function refresh() {
     }
 }
 
-setTimeout(refresh, refreshTime / 2);
+// setTimeout(refresh, refreshTime / 2);
 
 // Log data to server
 function logData(data) {
