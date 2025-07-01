@@ -8,7 +8,9 @@ const jsPsych = initJsPsych({
     if (!onserver) {
       jsPsych.data.get().localSave('csv', "tk_" + ppt_id + ".csv");
     }
-    jsPsych.data.displayData();
+    //jsPsych.data.displayData();
+    console.log(jsPsych.data.get());
+    window.location.reload();
   },
   on_close: function() {
     if (!onserver) {
@@ -144,12 +146,13 @@ const consent_trial = {
 const instructions = {
   type: jsPsychAudioButtonResponse,
   stimulus: 'audio/instructions.mp3',
-  prompt: '<p style="font-size: 20px;">Let\'s play a game!<br>' +
+  prompt: '<p style="font-size: 20px; line-height: 2;">Let\'s play a game!<br>' +
           'In this game, I will show you three pictures.<br>' +
           'Choose the picture that\'s not like the others.<br>' +
           'Let\'s look at a few together!</p>',
   trial_ends_after_audio: true,
-  // choices: ['Continue']
+  choices: ['Continue'],
+  button_html: ['']
 };
 
 // Define practice trials
@@ -233,7 +236,7 @@ const practice_loop = {
 // Page after practice trials
 const post_practice_instructions = {
   type: jsPsychAudioButtonResponse,
-  stimulus: 'audio/post_practice.mp3',
+  stimulus: 'audio/post_instructions.mp3',
   prompt: '<p style="font-size: 20px;">Great job! Let\'s look at some more pictures.</p>',
   choices: ['yes'],
   button_html: [
@@ -242,10 +245,12 @@ const post_practice_instructions = {
 };
 
 let current_block_index = 1;
+let first_trial_in_block = true;
 
 const game_trial_template = {
-  type: jsPsychHtmlButtonResponse,
-  stimulus: `<p style="text-align: center; font-weight: bold; font-size: 1.2em;">Which one is not like the others?</p>`,
+  type: jsPsychAudioButtonResponse,
+  stimulus: 'audio/empty.mp3',
+  prompt: `<p style="text-align: center; font-weight: bold; font-size: 1.2em;">Which one is not like the others?</p>`,
   choices: [0, 1, 2], // placeholder, will be replaced in on_start
   button_html: [],     // placeholder, will be replaced in on_start
   css_classes: ['triangle-layout'],
@@ -263,6 +268,10 @@ const game_trial_template = {
     ];
     trial.data.stimuli = trial_images;
     trial.data.block = current_block_index;
+    if (first_trial_in_block) {
+      first_trial_in_block = false;
+      trial.stimulus = 'audio/trial_instructions.mp3';
+    }
   },
   on_finish: function(data) {
     cacheAndLogData(data);
@@ -292,14 +301,24 @@ const continue_page = {
   }
 };
 
+const finish_page = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: '<p style="font-size: 20px;">Great job! Thanks for playing!</p>',
+  choices: ['finish'],
+  button_html: [
+    `<button id="finish-button">Finish</button>`
+  ]
+};
+
 const preload = {
   type: jsPsychPreload,
   images: [...imageFiles, 'images/cat_01b.jpg', 'images/cat_05s.jpg', 
     'images/chicken2_02s.jpg', 'images/chicken2_03s.jpg', 'images/dog_02s.jpg',
     'images/cookie_08s.jpg', 'images/cookie_09s.jpg',
     'images/apple_06s.jpg', 'images/apple_10s.jpg',
-    'images/yes.svg', 'images/no.svg']
-  // audio: audioFiles
+    'images/yes.svg', 'images/no.svg'],
+  audio: ['audio/instructions.mp3', 'audio/post_instructions.mp3', 'audio/continue.mp3', 
+    'audio/trial_instructions.mp3', 'audio/empty.mp3']
 };
 
 // Build your overall timeline as before.
@@ -324,11 +343,12 @@ const game_loop = {
     const trials = data.values ? data.values() : data.trials;
     const last_trial = trials[trials.length - 1];
     // End if "No, I'm done" (button index 1) is pressed
-    return !(last_trial.phase === 'continue_decision' && last_trial.response === 'no');
+    return !(last_trial.phase === 'continue_decision' && last_trial.response === 1);
   }
 };
 
 timeline.push(game_loop);
+timeline.push(finish_page);
 
 // Start the experiment.
 jsPsych.run(timeline);

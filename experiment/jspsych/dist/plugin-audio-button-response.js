@@ -123,6 +123,11 @@ var jsPsychAudioButtonResponse = (function (jspsych) {
               if (!trial.response_allowed_while_playing && !trial.trial_ends_after_audio) {
                   this.audio.addEventListener("ended", enable_buttons);
               }
+              //show prompt if there is one
+              var html = '';
+              if (trial.prompt !== null) {
+                  html += '<div id="jspsych-audio-button-response-prompt">' + trial.prompt + '</div>';
+              }
               //display buttons
               var buttons = [];
               if (Array.isArray(trial.button_html)) {
@@ -138,7 +143,7 @@ var jsPsychAudioButtonResponse = (function (jspsych) {
                       buttons.push(trial.button_html);
                   }
               }
-              var html = '<div id="jspsych-audio-button-response-btngroup">';
+              html += '<div id="jspsych-audio-button-response-btngroup">';
               for (var i = 0; i < trial.choices.length; i++) {
                   var str = buttons[i].replace(/%choice%/g, trial.choices[i]);
                   html +=
@@ -155,10 +160,6 @@ var jsPsychAudioButtonResponse = (function (jspsych) {
                           "</div>";
               }
               html += "</div>";
-              //show prompt if there is one
-              if (trial.prompt !== null) {
-                  html += trial.prompt;
-              }
               display_element.innerHTML = html;
               if (trial.response_allowed_while_playing) {
                   enable_buttons();
