@@ -2,6 +2,9 @@
 experiment/images/
 _image-database_CC0.zip
 
+# audio
+experiment/audio/
+
 # misc
 .DS_Store
 copy_images.py

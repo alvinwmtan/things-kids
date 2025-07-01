@@ -39,7 +39,7 @@ function cacheAndLogData(data) {
 const consent_trial = {
   type: jsPsychHtmlButtonResponse,
   stimulus: `
-    <h2>How old are you?:</h2>
+    <h2>Age:</h2>
     <div id="age-buttons">
       <button class="age-option" data-age="2">2</button>
       <button class="age-option" data-age="3">3</button>
@@ -53,7 +53,7 @@ const consent_trial = {
       <button class="age-option" data-age="Adult">Adult</button>
     </div>
     <br>
-    <h2>Please select your sex:</h2>
+    <h2>Sex:</h2>
     <div id="sex-buttons">
       <button class="sex-option" data-sex="male">Male</button>
       <button class="sex-option" data-sex="female">Female</button>
@@ -71,7 +71,7 @@ const consent_trial = {
       By proceeding, you and your child agree to participate in this research.
       Your child will be asked to categorize common objects on this tablet.
       No audio/video taping will occur and no identifiable information will be collected.
-      Your child's participation will take approximately 30 seconds – 5 minutes, depending on how long they choose to participate.
+      Your child's participation will take approximately 5 to 15 minutes, depending on how long they choose to participate.
       The data collected here will be used for research purposes by the Stanford Language and Cognition Lab and the San Jose Children's Discovery Museum,
       and may be displayed on the Museum's website at a future date.
       There are no risks or benefits to participating: no identifying information will be collected,
