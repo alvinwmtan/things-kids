@@ -1,5 +1,6 @@
 const onserver = true;
 let ppt_id = 'P' + Date.now();
+let start_time = Date();
 
 // Initialize jsPsych
 const jsPsych = initJsPsych({
@@ -19,7 +20,7 @@ const jsPsych = initJsPsych({
   }
 });
 
-jsPsych.data.addProperties({ ppt_id: ppt_id });
+jsPsych.data.addProperties({ ppt_id: ppt_id, start_time: start_time });
 
 // Data caching function
 function cacheAndLogData(data) {
@@ -164,10 +165,10 @@ const easy_practice_trials = [
 ];
 
 const medium_practice_trials = [
-  {stimulus: ['images/cat_05s.jpg', 'images/dog_02s.jpg', 'images/pie.jpg'], correct: 2},
+  {stimulus: ['images/cat_05s.jpg', 'images/dog_02s.jpg', 'images/cake.jpg'], correct: 2},
   {stimulus: ['images/apple_10s.jpg', 'images/leg.jpg', 'images/orange.jpg'], correct: 1},
   {stimulus: ['images/ear.jpg', 'images/cow.jpg', 'images/deer.jpg'], correct: 0},
-  {stimulus: ['images/horse.jpg', 'images/donkey.jpg', 'images/eye.jpg'], correct: 2},
+  {stimulus: ['images/horse.jpg', 'images/donkey.jpg', 'images/clock.jpg'], correct: 2},
   {stimulus: ['images/yogurt.jpg', 'images/tiger.jpg', 'images/soup.jpg'], correct: 1},
   {stimulus: ['images/ski.jpg', 'images/strawberry.jpg', 'images/watermelon.jpg'], correct: 0}
 ];
@@ -302,8 +303,9 @@ const continue_page = {
 };
 
 const finish_page = {
-  type: jsPsychHtmlButtonResponse,
-  stimulus: '<p style="font-size: 20px;">Great job! Thanks for playing!</p>',
+  type: jsPsychAudioButtonResponse,
+  stimulus: 'audio/thanks.mp3',
+  prompt: '<p style="font-size: 20px;">Great job! Thanks for playing!</p>',
   choices: ['finish'],
   button_html: [
     `<button id="finish-button">Finish</button>`
